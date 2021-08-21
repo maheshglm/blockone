@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  studentapi-db:
+    image: student-mysql-db:latest
+    container_name: app-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql-storage:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  studentapi:
+    image: student-api:latest
+    container_name: app
+    restart: on-failure
+    depends_on:
+      studentapi-db:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+
+volumes:
+  mysql-storage:
