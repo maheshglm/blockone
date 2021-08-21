@@ -1,3 +1,9 @@
+/*
+   I could not able to execute the pipeline due to infrastructure issues,
+   but I came up with Jenkinsfile such a way that with minimum updates,
+   we can build the pipeline in Jenkins.
+*/
+
 def repo_url = "git@github.com:maheshglm/blockone.git"
 
 pipeline {
@@ -8,7 +14,6 @@ pipeline {
     }
 
     environment {
-        SSH_KEY_ID = credentials("GITHUB_SSH_KEY")
         DOCKER_HUB_LOGIN = credentials("DOCKER_HUB_CREDS")
         SONAR_LOGIN = credentials("SONARQUBE_CREDS")
     }
@@ -23,6 +28,12 @@ pipeline {
     }
 
     stages {
+
+        stage ('Checkout source code') {
+            steps {
+                gitCheckout url: "${repo_url}"
+            }
+        }
 
         stage ('Build app') {
             steps {
@@ -77,8 +88,13 @@ pipeline {
             steps {
                 dir ('app') {
                     sh """
-                        cd student-api && docker-compose up -d
-                        cd ../student-api-tests && mvn clean install
+                        echo "Bring up the stack"
+                        cd student-api
+                        docker-compose up -d
+
+                        echo "Execute cucumber tests"
+                        cd ../student-api-tests
+                        mvn clean install
                     """
                 }
                cucumber buildStatus: null, fileIncludePattern: '**/*.json', jsonReportDirectory: 'testout/reports'
@@ -94,6 +110,7 @@ pipeline {
             }
         }
 
+        //It can be any docker registry
         stage ('Push images to Docker hub') {
             when {
                 branch 'master'
@@ -127,6 +144,7 @@ pipeline {
                 //1. I can possibly use Terraform or CloudFormation template to spin up an EC2 instance
                 //and deploy docker images
                 //2. If I have K8 cluster, I can deploy the pods onto it.
+                //please find the k8 deployment files at /k8/
             }
         }
     }
