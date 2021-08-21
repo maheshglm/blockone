@@ -42,6 +42,8 @@ public class CucumberConfig {
                 "--plugin",
                 "pretty",
                 "--plugin",
+                "json:" + reports + "/report.json",
+                "--plugin",
                 "html:" + reports,
                 features
         };

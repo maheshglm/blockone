@@ -199,3 +199,31 @@ to http://localhost:8080/h2-console. Default username is 'sa' with a blank passw
 ```
 [INFO] ANALYSIS SUCCESSFUL, you can browse http://localhost:9000/dashboard?id=com.block-one.test%3Astudent-api
 ```
+
+## Kubernetes deployment
+
+Apologies if I am not intended to this part, but out of my interest, I have explored this section This exercise done on
+the Docker Desktop with K8 installed Ensure the image is built and pushed to Docker hub (or Docker registry)
+
+### K8 deployment with h2 database (in-memory)
+
+* Ensure kubernetes is running on your machine.
+* Open `/k8/app_test.yaml` and update image name as per the docker registry config (LN#17)
+* Run `kubectl create -f app_test.yaml`
+* Verify `kubectl get pods`
+* Once `POD` status showing as `Running`, check API endpoint on port `127.0.0.1:30007`
+* To delete the deployment `kubectl delete -f app_test.yaml`
+
+### K8 deployment with mysql database
+
+* Ensure kubernetes is running on your machine
+* Open `/k8/db.yaml` and update image name as per the docker registry config (LN#62)
+* Run `kubectl create -f db.yaml`
+* Verify `kubectl get pods`
+* Wait till `studentapi-db` pod gets `Running` status
+* Open `/k8/app_dev.yaml` and update image name as per the docker registry config (LN#19)
+* Run `kubectl create -f app_dev.yaml`
+* Verify `kubectl get pods`
+* Wait till `studentapi` pod gets `Running` status
+* Check API endpoint on port `localhost:30007`
+* To delete the deployment `kubectl delete -f db.yaml` && `kubectl delete -f app_dev.yaml`
