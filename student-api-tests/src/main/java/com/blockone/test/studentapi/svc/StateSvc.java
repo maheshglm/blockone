@@ -2,6 +2,7 @@ package com.blockone.test.studentapi.svc;
 
 import com.blockone.test.studentapi.CustomException;
 import com.blockone.test.studentapi.CustomExceptionType;
+import com.blockone.test.studentapi.utils.WorkspaceUtils;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,14 +21,19 @@ import java.util.Properties;
 @Service
 public class StateSvc {
 
-    public static final String FAILED_WHEN_LOADING_NAMED_ENVIRONMENT_CONFIG_FROM_ENVIRONMENT_PROPERTIES_FILE = "failed when loading named environment [{}] config from environment properties file [{}]";
-    @Autowired
-    private StatePropertiesSvc statePropertiesSvc;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(StateSvc.class);
+
+    private static final String ENV_LOAD_ERROR_MESSAGE = "failed when loading named environment [{}] " +
+            "config from environment properties file [{}]";
 
     private Map<String, String> stringMap = new HashMap<>();
     private Map<String, String> envStringMap = new HashMap<>();
+
+    @Autowired
+    private StatePropertiesSvc statePropertiesSvc;
+
+    @Autowired
+    private WorkspaceUtils workspaceUtils;
 
     /**
      * Load env properties.
@@ -36,7 +42,7 @@ public class StateSvc {
      */
     public void loadEnvProperties(final String envName) {
         final String expandEnvName = expandExpression(envName);
-        final String envPropertiesPath = System.getProperty("user.dir") + "/config/env_" + expandEnvName + ".properties";
+        final String envPropertiesPath = workspaceUtils.getEnvDir() + "/env_" + expandEnvName + ".properties";
         LOGGER.debug("loading environment properties from [{}]", envPropertiesPath);
         envStringMap = new HashMap<>();
         try {
@@ -47,8 +53,8 @@ public class StateSvc {
                 envStringMap.put(key, props.getProperty(key));
             }
         } catch (IOException e) {
-            LOGGER.error(FAILED_WHEN_LOADING_NAMED_ENVIRONMENT_CONFIG_FROM_ENVIRONMENT_PROPERTIES_FILE, expandEnvName, envPropertiesPath, e);
-            throw new CustomException(e, CustomExceptionType.BOOTSTRAP_CONFIG, FAILED_WHEN_LOADING_NAMED_ENVIRONMENT_CONFIG_FROM_ENVIRONMENT_PROPERTIES_FILE, expandEnvName, envPropertiesPath);
+            LOGGER.error(ENV_LOAD_ERROR_MESSAGE, expandEnvName, envPropertiesPath, e);
+            throw new CustomException(e, CustomExceptionType.BOOTSTRAP_CONFIG, ENV_LOAD_ERROR_MESSAGE, expandEnvName, envPropertiesPath);
         }
     }
 
@@ -74,7 +80,6 @@ public class StateSvc {
         LOGGER.debug("lookup string var [{}]", name);
         String result;
 
-        statePropertiesSvc.populateGlobalPropsMap();
         if (stringMap.containsKey(name)) {
             result = stringMap.get(name);
             LOGGER.debug("fetched from String map [{}] => [{}]", name, result);
@@ -86,12 +91,15 @@ public class StateSvc {
             LOGGER.debug("fetched from Environment Properties map [{}] => [{}]", name, result);
             return result;
         }
+
+        statePropertiesSvc.populateGlobalPropsMap();
         return statePropertiesSvc.getGlobalPropsMap(name);
     }
 
     /**
      * Expand expression string.
      * Fetching values from variables by expanding each variable in the expression or string
+     *
      * @param expression the expression
      * @return the string
      */

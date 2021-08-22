@@ -19,9 +19,11 @@ import static io.restassured.RestAssured.given;
 public class RestApiSvc {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestApiSvc.class);
+
     public static final String API_RESPONSE_IS_NULL = "Api response is null";
     public static final String ENDPOINT_IS_NOT_SET_CANNOT_PROCESS_REQUEST = "Endpoint is not set, cannot process request";
     public static final String RESPONSE_IS_EMPTY = "Response is Empty";
+    public static final String REQUEST_TYPE_IS_NOT_IMPLEMENTED = "Request type [{}] is not implemented";
 
     private ThreadLocal<Response> response = new ThreadLocal<>();
     private ThreadLocal<RequestSpecification> requestSpec = new ThreadLocal<>();
@@ -40,26 +42,25 @@ public class RestApiSvc {
             final String url = apiBaseUri.get() + endPoint.get();
             switch (requestType) {
                 case GET:
-                    response.set(this.sendGetRequest(url));
+                    response.set(sendGetRequest(url));
                     break;
 
                 case POST:
-                    response.set(this.sendPostRequest(url));
+                    response.set(sendPostRequest(url));
                     break;
 
                 case DELETE:
-                    response.set(this.sendDeleteRequest(url));
+                    response.set(sendDeleteRequest(url));
                     break;
 
                 case PUT:
-                    response.set(this.sendPutRequest(url));
+                    response.set(sendPutRequest(url));
                     break;
 
                 default:
-                    LOGGER.error("Request type [{}] is not implemented", requestType);
-                    throw new CustomException(CustomExceptionType.UNDEFINED, "Request type [{}] is not implemented", requestType);
+                    LOGGER.error(REQUEST_TYPE_IS_NOT_IMPLEMENTED, requestType);
+                    throw new CustomException(CustomExceptionType.UNDEFINED, REQUEST_TYPE_IS_NOT_IMPLEMENTED, requestType);
             }
-
             response.get().then().log().ifError();
             return response.get();
         } finally {
@@ -67,10 +68,10 @@ public class RestApiSvc {
         }
     }
 
-
     public void clearRequestSpecifications() {
         LOGGER.debug("Clearing Request Specifications");
         requestSpec = new ThreadLocal<>();
+        endPointParams = ThreadLocal.withInitial(HashMap::new);
     }
 
     public RequestSpecification getRequestSpec() {
@@ -84,7 +85,6 @@ public class RestApiSvc {
         }
         return response.get();
     }
-
 
     public void setApiBaseUri(final String apiBaseUri) {
         LOGGER.debug("Setting Api base url [{}]", apiBaseUri);

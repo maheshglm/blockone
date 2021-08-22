@@ -3,6 +3,7 @@ package com.blockone.test.studentapi.svc;
 
 import com.blockone.test.studentapi.CustomException;
 import com.blockone.test.studentapi.CustomExceptionType;
+import com.blockone.test.studentapi.utils.WorkspaceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,13 @@ public class StatePropertiesSvc {
     @Autowired
     private StateSvc stateSvc;
 
+    @Autowired
+    private WorkspaceUtils workspaceUtils;
+
     private Map<String, String> globalPropsMap = null;
 
     public synchronized void loadFrameworkProperties() {
-        File file = new File(System.getProperty("user.dir") + "/config/framework.properties");
+        File file = new File(workspaceUtils.getEnvDir() + "/framework.properties");
         LOGGER.debug("loading properties from [{}]", file.getAbsolutePath());
         Properties props = new Properties();
         try {

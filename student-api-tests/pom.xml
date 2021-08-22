@@ -27,6 +27,7 @@
         <commons-io.version>2.6</commons-io.version>
         <cucumber-reporting.version>4.6.0</cucumber-reporting.version>
         <junit.version>4.12</junit.version>
+        <wiremock.version>1.58</wiremock.version>
     </properties>
 
     <dependencies>
@@ -47,6 +48,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>${wiremock.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
@@ -142,6 +149,11 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.25</version>
         </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -159,7 +171,8 @@
                 </dependencies>
                 <configuration>
                     <includes>
-                        <include>**/CucumberRunner*.java</include>
+                        <include>**/*Test*.java</include>
+                        <include>**/*IT*.java</include>
                     </includes>
                 </configuration>
             </plugin>

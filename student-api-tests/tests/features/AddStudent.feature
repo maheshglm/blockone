@@ -80,7 +80,6 @@ Feature: Add Student with /addStudent endpoint
     AND nationality='UK';
     """
 
-
   Scenario: Cleanup
 
     * I execute below query to "delete students created above"
