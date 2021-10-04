@@ -9,9 +9,7 @@ def repo_url = "git@github.com:maheshglm/blockone.git"
 pipeline {
 
     //Assume we have an agent configured with Java11, Maven3 and Docker installed
-    agent {
-        any
-    }
+    agent any
 
     options {
         ansiColor('xterm')
