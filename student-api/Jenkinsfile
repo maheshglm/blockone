@@ -32,6 +32,7 @@ pipeline {
             steps {
                    sh '''
                    pwd
+                   cd ${WORKSPACE}/student-api
                    mvn clean package -DskipTests=true
                    '''
             }
@@ -39,7 +40,10 @@ pipeline {
 
         stage ('Run unit tests') {
             steps {
-                    sh "mvn test"
+                    sh '''
+                      cd ${WORKSPACE}/student-api
+                      mvn test
+                    '''
             }
         }
     }
