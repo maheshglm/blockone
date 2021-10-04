@@ -11,11 +11,6 @@ pipeline {
     //Assume we have an agent configured with Java11, Maven3 and Docker installed
     agent any
 
-    options {
-        ansiColor('xterm')
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-    }
-
     triggers {
         pollSCM 'H H 1 12 *'
     }
