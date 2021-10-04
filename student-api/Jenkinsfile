@@ -30,17 +30,16 @@ pipeline {
 
         stage ('Build app') {
             steps {
-                dir ('app/student-api') {
-                    sh 'mvn clean package -DskipTests=true'
-                }
+                   sh '''
+                   pwd
+                   mvn clean package -DskipTests=true
+                   '''
             }
         }
 
         stage ('Run unit tests') {
             steps {
-                dir ('app/student-api') {
                     sh "mvn test"
-                }
             }
         }
     }
