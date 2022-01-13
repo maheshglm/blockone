@@ -86,4 +86,3 @@ Feature: Add Student with /addStudent endpoint
     """
     DELETE FROM student WHERE id IN (${random_id2}, ${random_id1});
     """
-

@@ -3,11 +3,13 @@ package com.blockone.test.studentapi.controller;
 import com.blockone.test.studentapi.exception.ResourceNotFoundException;
 import com.blockone.test.studentapi.model.Student;
 import com.blockone.test.studentapi.repository.StudentRepo;
+import com.blockone.test.studentapi.response.ResponseHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,22 +75,34 @@ public class StudentController {
      */
     @ApiOperation(value = "Create a student resource",
             notes = "If student with given id exists, it writes a warning message in the console")
-    @PostMapping("/addStudent")
+    @PostMapping(value = "/addStudent", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> addStudent(@RequestBody Student student) {
-        if (student == null || student.getId() == null) {
-            LOGGER.error("Student details or id cannot be null");
-            return new ResponseEntity<>(student, HttpStatus.BAD_REQUEST);
+        if (student == null) {
+            LOGGER.error("Student details cannot be null");
+            return ResponseHandler.generateResponse("Student details cannot be null",
+                    HttpStatus.BAD_REQUEST,
+                    null);
         }
-        Optional<Student> exist = repo.findById(student.getId());
-        if (exist.isEmpty()) {
-            LOGGER.debug("Adding student with id [{}]", student.getId());
-            repo.save(student);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body("Student with id=" + student.getId() + " added successfully");
+
+        Optional<Student> studentExist = repo.findById(student.getId());
+        if (studentExist.isEmpty()) {
+            try {
+                Student result = repo.save(student);
+                LOGGER.debug("Student with id [{}] added successfully", student.getId());
+                return ResponseHandler.generateResponse(
+                        "Student with id=" + student.getId() + " added successfully",
+                        HttpStatus.CREATED, result);
+            } catch (Exception e) {
+                LOGGER.error("{}", e.getMessage());
+                return ResponseHandler.generateResponse(
+                        e.getMessage(),
+                        HttpStatus.BAD_REQUEST, null);
+            }
         } else {
             LOGGER.warn("Student with id [{}] already available", student.getId());
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("Student with id=" + student.getId() + " already available");
+            return ResponseHandler.generateResponse(
+                    "Student with id=" + student.getId() + " already available",
+                    HttpStatus.OK, null);
         }
     }
 
@@ -100,23 +114,27 @@ public class StudentController {
      */
     @ApiOperation(value = "Updates student details", notes = "Unique id to be used to update student details")
     @PutMapping("/updateStudent")
-    public ResponseEntity<Student> updateStudent(@RequestBody Student studentDetails) {
+    public ResponseEntity<?> updateStudent(@RequestBody Student studentDetails) {
 
         if (studentDetails == null || studentDetails.getId() == null) {
             LOGGER.error("Student details or id cannot be null");
-            return new ResponseEntity<>(studentDetails, HttpStatus.BAD_REQUEST);
+            return ResponseHandler.generateResponse("Student details or id cannot be null",
+                    HttpStatus.BAD_REQUEST,
+                    null);
         }
         LOGGER.debug("Updating student with id [{}]", studentDetails.getId());
 
         Student student = isStudentAvailable(studentDetails.getId());
-
         student.setClazz(studentDetails.getClazz() == null ? student.getClazz() : studentDetails.getClazz());
         student.setFirstName(studentDetails.getFirstName() == null ? student.getFirstName() : studentDetails.getFirstName());
         student.setLastName(studentDetails.getLastName() == null ? student.getLastName() : studentDetails.getLastName());
         student.setNationality(studentDetails.getNationality() == null ? student.getNationality() : studentDetails.getNationality());
-        repo.save(student);
+
+        Student result = repo.save(student);
         LOGGER.debug("Student with id={} updated successfully", studentDetails.getId());
-        return new ResponseEntity<>(student, HttpStatus.OK);
+        return ResponseHandler.generateResponse("Student with id=" + studentDetails.getId() + " updated successfully",
+                HttpStatus.OK,
+                result);
     }
 
     /**
@@ -131,14 +149,14 @@ public class StudentController {
         LOGGER.debug("Deleting student with id [{}]", id);
         Student student = isStudentAvailable(id);
         repo.deleteById(id);
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseHandler.generateResponse(
+                "Student with id=" + id + " deleted successfully",
+                HttpStatus.OK,
+                student);
     }
 
     private Student isStudentAvailable(@RequestParam Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(STUDENT, ID, id));
     }
-
-
 }

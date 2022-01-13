@@ -14,7 +14,6 @@ import io.cucumber.datatable.DataTable;
 public class RestApiStepsDef {
 
     RestApiSteps restApiSteps = (RestApiSteps) Bootstrap.getBean(RestApiSteps.class);
-
     DataTableSvc dataTableSvc = (DataTableSvc) Bootstrap.getBean(DataTableSvc.class);
 
     /**
