@@ -2,6 +2,7 @@
 
 This is a sample Java/Maven/Spring Boot application for Student CRUD operations.
 
+
 ## How to Run
 
 * Clone this repository
