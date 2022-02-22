@@ -157,12 +157,14 @@
         <repository>
             <id>nexus</id>
             <name>Releases</name>
-            <url>http://localhost:8081/repository/devops-release</url>
+            <url>http://ec2-18-138-234-156.ap-southeast-1.compute.amazonaws.com:8081/repository/poc_internal_hosted</url>
+<!--            <url>http://localhost:8081/repository/devops-release</url>-->
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Snapshot</name>
-            <url>http://localhost:8081/repository/devops-snapshot</url>
+            <url>http://ec2-18-138-234-156.ap-southeast-1.compute.amazonaws.com:8081/repository/poc_internal_hosted</url>
+            <!--            <url>http://localhost:8081/repository/devops-snapshot</url>-->
         </snapshotRepository>
     </distributionManagement>
 
